@@ -33,6 +33,9 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
 //Number of days per week
 @property (nonatomic, assign) NSUInteger daysPerWeek;
 
+// Selected Dates
+@property (nonatomic, strong, readwrite) NSMutableSet<NSDate *> * selectedDates;
+
 @end
 
 
@@ -88,6 +91,7 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
     self.daysPerWeek = 7;
     self.weekdayHeaderEnabled = NO;
     self.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeShort;
+    self.selectedDates = [[NSMutableSet alloc] init];
 }
 
 #pragma mark - View Lifecycle
@@ -211,7 +215,10 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
         [[self cellForItemAtDate:_selectedDate] setSelected:NO];
         [[self cellForItemAtDate:startOfDay] setSelected:YES];
     }
-
+    else {
+        [self.selectedDates addObject:newSelectedDate];
+    }
+    
     _selectedDate = startOfDay;
 
     NSIndexPath *indexPath = [self indexPathForCellAtDate:_selectedDate];
@@ -403,6 +410,7 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
 
     if (isSelected) {
         [cell setSelected:isSelected];
+        [collectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionNone];
     }
 
     //If the current Date is not enabled, or if the delegate explicitely specify custom colors
@@ -425,6 +433,12 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
 }
 
 #pragma mark - UICollectionViewDelegate
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath {
+    NSDate * cellDate = [self dateForCellAtIndexPath:indexPath];
+    [self.selectedDates removeObject:cellDate];
+    return YES;
+}
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -511,7 +525,6 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
     }];
 }
 
-#pragma mark -
 #pragma mark - Calendar calculations
 
 - (NSDate *)clampDate:(NSDate *)date toComponents:(NSUInteger)unitFlags
@@ -530,7 +543,14 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
     if (!self.selectedDate) {
         return NO;
     }
-    return [self clampAndCompareDate:date withReferenceDate:self.selectedDate];
+    
+    for (NSDate *d in self.selectedDates) {
+        if ([self clampAndCompareDate:date withReferenceDate:d]) {
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 - (BOOL)isEnabledDate:(NSDate *)date
@@ -609,6 +629,15 @@ static const NSInteger kFirstDay = 1;
 - (PDTSimpleCalendarViewCell *)cellForItemAtDate:(NSDate *)date
 {
     return (PDTSimpleCalendarViewCell *)[self.collectionView cellForItemAtIndexPath:[self indexPathForCellAtDate:date]];
+}
+
+- (void)clearSelectedDates {
+    NSMutableArray<NSIndexPath *> *indexPaths = [[NSMutableArray alloc] initWithCapacity:self.selectedDates.count];
+    for (NSDate *d in self.selectedDates) {
+        [indexPaths addObject:[self indexPathForCellAtDate:d]];
+    }
+    [self.selectedDates removeAllObjects];
+    [self.collectionView reloadItemsAtIndexPaths:indexPaths];
 }
 
 #pragma mark - PDTSimpleCalendarViewCellDelegate

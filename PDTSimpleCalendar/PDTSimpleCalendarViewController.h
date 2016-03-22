@@ -82,6 +82,10 @@
  */
 @property (nonatomic, weak) id<PDTSimpleCalendarViewDelegate> delegate;
 
+/**
+ *  All selected dates
+ */
+@property (nonatomic, strong, readonly) NSMutableSet<NSDate *> * selectedDates;
 
 /**
  *  Scroll to the current selected date in the calendar.
@@ -97,6 +101,11 @@
  *  @param animated if you want to animate the scrolling
  */
 - (void)scrollToDate:(NSDate *)date animated:(BOOL)animated;
+
+/**
+ *  Clear selection
+ */
+- (void)clearSelectedDates;
 
 @end
 
