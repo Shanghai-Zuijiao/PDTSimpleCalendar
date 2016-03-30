@@ -214,10 +214,9 @@ static const NSCalendarUnit kCalendarUnitYMD = NSCalendarUnitYear | NSCalendarUn
     if (!self.collectionView.allowsMultipleSelection) {
         [[self cellForItemAtDate:_selectedDate] setSelected:NO];
         [[self cellForItemAtDate:startOfDay] setSelected:YES];
+        [self.selectedDates removeAllObjects];
     }
-    else {
-        [self.selectedDates addObject:newSelectedDate];
-    }
+    [self.selectedDates addObject:newSelectedDate];
     
     _selectedDate = startOfDay;
 
