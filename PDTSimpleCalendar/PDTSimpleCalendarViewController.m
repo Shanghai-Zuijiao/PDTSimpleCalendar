@@ -639,6 +639,13 @@ static const NSInteger kFirstDay = 1;
     [self.collectionView reloadItemsAtIndexPaths:indexPaths];
 }
 
+- (void)clearInSeletedDates:(NSDate *)date {
+    if (![self.selectedDates containsObject:date]) return;
+    NSIndexPath *indexPath = [self indexPathForCellAtDate:date];
+    [self.selectedDates removeObject:date];
+    [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+}
+
 #pragma mark - PDTSimpleCalendarViewCellDelegate
 
 - (BOOL)simpleCalendarViewCell:(PDTSimpleCalendarViewCell *)cell shouldUseCustomColorsForDate:(NSDate *)date

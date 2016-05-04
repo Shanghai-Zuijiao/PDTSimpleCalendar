@@ -107,6 +107,11 @@
  */
 - (void)clearSelectedDates;
 
+/**
+ *  Clear the select date
+ */
+- (void)clearInSeletedDates:(NSDate *)date;
+
 @end
 
 
